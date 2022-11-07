@@ -1,4 +1,14 @@
 //uncomment to override bootstrap's variables
+//======================= CUSTOM ==================================
+// 글꼴
+@font-face {
+  font-family: 'Nanum Square';
+  src: url('~@/assets/fonts/NanumSquare_acEB.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Nanum Barun Gothic';
+  src: url('~@/assets/fonts/NanumBarunGothic.ttf') format('truetype');
+}
 //====================== BOOTSTRAP VARIABLES ======================
 
 // Color system
