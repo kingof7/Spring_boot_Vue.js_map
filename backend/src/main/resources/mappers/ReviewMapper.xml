@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.api.backend.dao.ReviewDAO">
+    <insert id="saveReview">
+        insert into tbl_review (
+        id,
+        title,
+        address,
+        review,
+        grade,
+        lon,
+        lat,
+        update_date
+        )
+        values (
+        #{id},
+        #{title},
+        #{address},
+        #{review},
+        #{grade},
+        #{lon},
+        #{lat},
+        UTC_TIMESTAMP()
+        ) on duplicate key
+        update
+        title = #{title},
+        address = #{address},
+        review = #{review},
+        grade = #{grade},
+        lon = #{lon},
+        lat = #{lat},
+        update_date = UTC_TIMESTAMP()
+    </insert>
+
+    <select id="getReviewsByKeySet" resultType="camelMap">
+        select
+        r.id,
+        r.title,
+        r.address,
+        r.review,
+        r.grade,
+        r.lon,
+        r.lat,
+        DATE_FORMAT(r.update_date, '%Y%m%d%H%i%s') as review_up_date_str,
+        f.file_id,
+        f.file_name,
+        f.file_size,
+        f.content_type,
+        DATE_FORMAT(f.update_date, '%Y%m%d%H%i%s') as file_up_date_str
+        from
+        tbl_review r
+        left join
+        tbl_file_info f
+        on
+        f.file_id = (
+        select
+        file_id
+        from
+        tbl_file_info file
+        where
+        file.review_id = r.id
+        limit 1
+        )
+        <where>
+            <if test="reviewUpdateDate != null and reviewId != null">
+                r.update_date <![CDATA[<=]]> #{reviewUpdateDate}
+                and
+                r.id <![CDATA[<]]> #{reviewId}
+            </if>
+        </where>
+        order by r.update_date, r.id desc
+        limit 10
+    </select>
+
+    <select id="getReview" resultType="kr.co.api.backend.dto.ReviewDTO">
+        select
+        r.id,
+        r.title,
+        r.address,
+        r.review,
+        r.grade,
+        r.lon,
+        r.lat,
+        DATE_FORMAT(r.update_date, '%Y%m%d%H%i%s') as review_up_date_str
+        from
+        tbl_review r
+        where
+        r.id = #{reviewId}
+    </select>
+
+    <select id="getReviewsForMap" resultType="camelMap">
+        select
+        r.id,
+        r.title,
+        r.grade,
+        r.lon,
+        r.lat
+        from
+        tbl_review r
+    </select>
+
+    <delete id="deleteReviews">
+        delete
+        from tbl_review
+        <where>
+            <foreach collection="reviewIds" item="reviewId" separator="or">
+                id = #{reviewId}
+            </foreach>
+        </where>
+    </delete>
+</mapper>
